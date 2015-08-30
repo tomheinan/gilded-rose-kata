@@ -1,48 +1,45 @@
 def update_quality(items)
   items.each do |item|
-    if item.name != 'Aged Brie' && item.name != 'Backstage passes to a TAFKAL80ETC concert'
-      if item.quality > 0
-        if item.name != 'Sulfuras, Hand of Ragnaros'
-          item.quality -= 1
-        end
-      end
-    else
-      if item.quality < 50
-        item.quality += 1
-        if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-          if item.sell_in < 11
-            if item.quality < 50
-              item.quality += 1
-            end
-          end
-          if item.sell_in < 6
-            if item.quality < 50
-              item.quality += 1
-            end
-          end
-        end
-      end
-    end
-    if item.name != 'Sulfuras, Hand of Ragnaros'
-      item.sell_in -= 1
-    end
-    if item.sell_in < 0
-      if item.name != "Aged Brie"
-        if item.name != 'Backstage passes to a TAFKAL80ETC concert'
-          if item.quality > 0
-            if item.name != 'Sulfuras, Hand of Ragnaros'
-              item.quality -= 1
-            end
-          end
-        else
-          item.quality = item.quality - item.quality
-        end
+
+    sell_in = item.sell_in
+    quality = item.quality
+
+    # time passes...
+    sell_in -= 1
+
+    case item.name
+    when /aged brie/i
+      sell_in < 0 ? quality += 2 : quality += 1
+    when /sulfuras/i
+      next
+    when /backstage pass(?:es)?/i
+      case
+      when sell_in < 0
+        quality = 0
+      when sell_in < 5
+        quality += 3
+      when sell_in < 10
+        quality += 2
       else
-        if item.quality < 50
-          item.quality += 1
-        end
+        quality += 1
       end
+    when /conjured/i
+      sell_in < 0 ? quality -= 4 : quality -= 2
+    else
+      sell_in < 0 ? quality -= 2 : quality -= 1
     end
+
+    item.sell_in = sell_in
+
+    case
+    when quality < 0
+      item.quality = 0
+    when quality > 50
+      item.quality = 50
+    else
+      item.quality = quality
+    end
+
   end
 end
 
